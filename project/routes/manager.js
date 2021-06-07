@@ -3,6 +3,7 @@ var router = express.Router();
 const DButils = require("../routes/utils/DButils");
 const users_utils = require("./utils/users_utils");
 
+const ManagUtils = require("../routes/utils/manager_utils");
 
 router.use(async function (req, res, next) {
     if (req.session && req.session.user_id) {
@@ -28,18 +29,19 @@ router.post("/addGame", async (req, res, next) => {
         }
         else {
 
-            if (typeof req.body.gamedate != 'string' || typeof req.body.gametime != 'string' || isNaN(req.body.hometeamID) || isNaN(req.body.awayteamID) || typeof req.body.field != 'string' || typeof req.body.referee != 'string'){
-                throw { status: 400, message: "incorrect inputs" };
-            }
+            checkInput(req.body.gamedate, req.body.gametime, req.body.hometeamID, req.body.awayteamID, req.body.field, req.body.referee);
+            
+            const fieldgame = await ManagUtils.getStadium(req.body.field);
+            // const fieldgame = await DButils.execQuery(
+            //     `SELECT name FROM dbo.stadiums WHERE name = '${req.body.field}'`
+            // );
 
-            const fieldgame = await DButils.execQuery(
-                `SELECT name FROM dbo.stadiums WHERE name = '${req.body.field}'`
-            );
 
-            const refereegame = await DButils.execQuery(
-                `SELECT name FROM dbo.referees WHERE name = '${req.body.referee}'`
-            );
-
+            const refereegame = await ManagUtils.getReferee(req.body.referee);
+            // const refereegame = await DButils.execQuery(
+            //     `SELECT name FROM dbo.referees WHERE name = '${req.body.referee}'`
+            // );
+            validParameters(req.body.gamedate, fieldgame, refereegame);
             let dateReg = /^\d{4}[./-]\d{2}[./-]\d{2}$/;
             let isdatevalid = dateReg.test(req.body.gamedate);
             
@@ -58,18 +60,21 @@ router.post("/addGame", async (req, res, next) => {
             // else if((req.body.gamedate).match(dateReg))
             else{
                 
-                let flag = true;
-                const games = await DButils.execQuery(
-                    `SELECT gamedate, hometeamID, awayteamID, referee, field FROM dbo.games`
-                );       
+                
+                
+                const games = await ManagUtils.getAllMatches();
+                // const games = await DButils.execQuery(
+                //     `SELECT gamedate, hometeamID, awayteamID, referee, field FROM dbo.games`
+                // );       
 
-                for(let i = 0 ; i< games.length; i++){
-                    if(String(games[i].gamedate) == req.body.gamedate){
-                        if (games[i].hometeamID == req.body.hometeamID || games[i].hometeamID == req.body.awayteamID || games[i].awayteamID == req.body.hometeamID || games[i].awayteamID == req.body.awayteamID || games[i].referee == req.body.referee || games[i].field == req.body.field){
-                            flag = false;
-                        }
-                    }
-                }
+                let flag = checkExistanceGame(games, req);
+                // for(let i = 0 ; i< games.length; i++){
+                //     if(String(games[i].gamedate) == req.body.gamedate){
+                //         if (games[i].hometeamID == req.body.hometeamID || games[i].hometeamID == req.body.awayteamID || games[i].awayteamID == req.body.hometeamID || games[i].awayteamID == req.body.awayteamID || games[i].referee == req.body.referee || games[i].field == req.body.field){
+                //             flag = false;
+                //         }
+                //     }
+                // }
 
                 if(flag){
                     await DButils.execQuery(
@@ -78,7 +83,7 @@ router.post("/addGame", async (req, res, next) => {
                     res.status(201).send("game has been added");
                 }
                 else{
-                    res.status(201).send("game cant be add");
+                    res.status(201).send("game can not be added");
                 }
             }
      
@@ -87,6 +92,55 @@ router.post("/addGame", async (req, res, next) => {
         next(error);
     }
 });
+
+function checkExistanceGame(Games, req){
+    for(let i = 0 ; i< games.length; i++){
+        if(String(games[i].gamedate) == req.body.gamedate){
+            if (games[i].hometeamID == req.body.hometeamID || games[i].hometeamID == req.body.awayteamID || games[i].awayteamID == req.body.hometeamID || games[i].awayteamID == req.body.awayteamID || games[i].referee == req.body.referee || games[i].field == req.body.field){
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function validParameters(gamedate, fieldgame, refereegame){
+    let dateReg = /^\d{4}[./-]\d{2}[./-]\d{2}$/;
+    let isdatevalid = dateReg.test(gamedate);
+    console.log(gamedate);
+    if(!isdatevalid){
+        res.status(201).send("The date is not valid");
+    }
+
+    let fields = gamedate.split('-');
+    let year = fields[0];
+    let month = fields[1];
+    let day = fields[2];
+    if(month >12 || month<0 ){
+        res.status(201).send("The month is not valid");
+    }
+    if(day >31 || day<0 ){
+        res.status(201).send("The day is not valid");
+    }
+    if(year < 2021 || year> 2022){
+        res.status(201).send("The year should be 2021");
+    }
+    if(0){
+
+    }
+    else if (fieldgame.length == 0 ){
+        res.status(201).send("There is no stadium with this name");
+    }
+    else if (refereegame.length == 0){
+        res.status(201).send("There is no referee with this name");
+    }
+}
+
+function checkInput(gamedate, gametime, hometeamID, awayteamID, field, referee){
+    if (typeof gamedate != 'string' || typeof gametime != 'string' || isNaN(hometeamID) || isNaN(awayteamID) || typeof field != 'string' || typeof referee != 'string'){
+        throw { status: 400, message: "incorrect inputs" };
+    }
+}
 
 
 router.put("/addScore", async (req, res, next) => {
