@@ -52,6 +52,8 @@ router.post("/addGame", async (req, res, next) => {
 
             else{
                 const games = await ManagUtils.getAllMatches();
+    
+
                 let flag = checkExistanceGame(games, req);
 
                 if(flag){
@@ -179,7 +181,7 @@ router.post("/appointReferee", async (req, res, next) => {
     try {
         const user_id = req.session.user_id;
         if (user_id != 2) {
-            res.status(403).send("The user doesnt have access to add game")
+            res.status(403).send("The user doesnt have access")
         }
         else {
             const user_id = req.body.userID;
@@ -189,7 +191,7 @@ router.post("/appointReferee", async (req, res, next) => {
                 res.status(400).send("user does not exist");
             else{
                 const name = user.firstname + " " + user.lastname;
-                await DButils.execQuery(`insert into dbo.referees values ('${name}')`);
+                await referee_utils.addReferee(name);
                 res.status(200).send("referee appointed successfully");
             }
         }
