@@ -59,13 +59,13 @@ function doSchedule(teams, referees, stadiums) {
         }
         stages[i] = stage;
         arr = shiftTeams(arr);
-        // console.log(stage);
+        console.log(stage);
     }    
     return stages;
 }
 
 
-// doSchedule([1,2,3,4,5,6,7,8,9,10,11,12], ['a', 'b'], ['a', 'b']);
+doSchedule([1,2,3,4,5,6,7,8,9,10,11,12], ['a', 'b'], ['a', 'b']);
 
 
 module.exports = doSchedule;

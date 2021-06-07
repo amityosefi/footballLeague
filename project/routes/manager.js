@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 const DButils = require("../routes/utils/DButils");
+const users_utils = require("./utils/users_utils");
 
 
 router.use(async function (req, res, next) {
@@ -171,5 +172,50 @@ router.post("/addEvent", async (req, res, next) => {
         next(error);
     }
 });
+
+
+
+router.get("/viewAllUsers", async (req, res, next) => {
+    try {
+        const user_id = req.session.user_id;
+        if (user_id != 2) {
+            res.status(403).send("The user doesnt have access to add game")
+        }
+        else {
+            const users = await users_utils.getUsers();
+            res.status(200).send(users);
+        }
+      
+    } catch (error) {
+      next(error);
+    }
+  });
+
+
+router.post("/appointReferee", async (req, res, next) => {
+    try {
+        const user_id = req.session.user_id;
+        if (user_id != 2) {
+            res.status(403).send("The user doesnt have access to add game")
+        }
+        else {
+            const user_id = req.body.userID;
+            // check if user exists (in db)
+            const user = (await users_utils.getUserByID(user_id))[0];
+            if (user == undefined)
+                res.status(400).send("user does not exist");
+            else{
+                const name = user.firstname + " " + user.lastname;
+                await DButils.execQuery(`insert into dbo.referees values ('${name}')`);
+                res.status(200).send("referee appointed successfully");
+            }
+        }
+        
+    } catch (error) {
+        next(error);
+}
+});
+
+
 
 module.exports = router;
