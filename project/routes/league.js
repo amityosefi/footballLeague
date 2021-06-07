@@ -58,5 +58,29 @@ router.get("/allgames", async (req, res, next) => {
     next(error);
   }
 });
+
+router.get("/allgames", async (req, res, next) => {
+  try {
+
+    const all_games = await DButils.execQuery(
+      `select * from dbo.games`
+    );
+
+    res.status(200).send(all_games);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/teamsbyleague", async (req, res, next) => {
+  try {
+    const teams = await league_utils.get_all_teams();
+
+    res.status(200).send(teams)
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
 

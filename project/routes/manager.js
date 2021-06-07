@@ -1,7 +1,11 @@
 var express = require("express");
 var router = express.Router();
 const DButils = require("../routes/utils/DButils");
+const league_utils = require("./utils/league_utils");
+const manager_utils = require("./utils/manager_utils");
+const referees_utils = require("./utils/referees_utils");
 
+const ManagUtils = require("../routes/utils/manager_utils");
 
 router.use(async function (req, res, next) {
     if (req.session && req.session.user_id) {
@@ -27,18 +31,12 @@ router.post("/addGame", async (req, res, next) => {
         }
         else {
 
-            if (typeof req.body.gamedate != 'string' || typeof req.body.gametime != 'string' || isNaN(req.body.hometeamID) || isNaN(req.body.awayteamID) || typeof req.body.field != 'string' || typeof req.body.referee != 'string'){
-                throw { status: 400, message: "incorrect inputs" };
-            }
+            ManagUtils.checkInput(req.body.gamedate, req.body.gametime, req.body.hometeamID, req.body.awayteamID, req.body.field, req.body.referee);
+            
+            const fieldgame = await ManagUtils.getStadium(req.body.field);
+            const refereegame = await referee_utils.getReferee(req.body.referee);
 
-            const fieldgame = await DButils.execQuery(
-                `SELECT name FROM dbo.stadiums WHERE name = '${req.body.field}'`
-            );
-
-            const refereegame = await DButils.execQuery(
-                `SELECT name FROM dbo.referees WHERE name = '${req.body.referee}'`
-            );
-
+            ManagUtils.validParameters(req.body.gamedate, fieldgame, refereegame);
             let dateReg = /^\d{4}[./-]\d{2}[./-]\d{2}$/;
             let isdatevalid = dateReg.test(req.body.gamedate);
             
@@ -52,23 +50,11 @@ router.post("/addGame", async (req, res, next) => {
                 res.status(201).send("There is no referee with this name");
             }
 
-            
-
-            // else if((req.body.gamedate).match(dateReg))
             else{
-                
-                let flag = true;
-                const games = await DButils.execQuery(
-                    `SELECT gamedate, hometeamID, awayteamID, referee, field FROM dbo.games`
-                );       
+                const games = await ManagUtils.getAllMatches();
+    
 
-                for(let i = 0 ; i< games.length; i++){
-                    if(String(games[i].gamedate) == req.body.gamedate){
-                        if (games[i].hometeamID == req.body.hometeamID || games[i].hometeamID == req.body.awayteamID || games[i].awayteamID == req.body.hometeamID || games[i].awayteamID == req.body.awayteamID || games[i].referee == req.body.referee || games[i].field == req.body.field){
-                            flag = false;
-                        }
-                    }
-                }
+                let flag = checkExistanceGame(games, req);
 
                 if(flag){
                     await DButils.execQuery(
@@ -77,7 +63,7 @@ router.post("/addGame", async (req, res, next) => {
                     res.status(201).send("game has been added");
                 }
                 else{
-                    res.status(201).send("game cant be add");
+                    res.status(201).send("game can not be added");
                 }
             }
      
@@ -171,5 +157,55 @@ router.post("/addEvent", async (req, res, next) => {
         next(error);
     }
 });
+
+router.post("/set_schedule", async (req, res, next) => {
+    try {
+        const user_id = req.session.user_id;
+        const rounds = req.body.rounds;
+        if (isNaN(rounds)){
+            throw { status: 400, message: "incorrect inputs" };
+        }
+        const teams_stadiums = await league_utils.get_all_teams();
+        // const referees = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+        const referees = await referees_utils.getAllReferees();
+        let teams = [];
+        let stadiums = new Object();
+        for(let i = 0; i < teams_stadiums.length; i ++){
+            teams.push(teams_stadiums[i][0]);
+            stadiums[teams_stadiums[i][0]] =  teams_stadiums[i][1];
+        }
+        const ans = await manager_utils.doSchedule(teams, referees, stadiums, rounds);
+        res.status(201).send(ans);
+    } catch (error) {
+        next(error);
+    }
+  });
+
+
+router.post("/appointReferee", async (req, res, next) => {
+    try {
+        const user_id = req.session.user_id;
+        if (user_id != 2) {
+            res.status(403).send("The user doesnt have access")
+        }
+        else {
+            const user_id = req.body.userID;
+            // check if user exists (in db)
+            const user = (await users_utils.getUserByID(user_id))[0];
+            if (user == undefined)
+                res.status(400).send("user does not exist");
+            else{
+                const name = user.firstname + " " + user.lastname;
+                await referee_utils.addReferee(name);
+                res.status(200).send("referee appointed successfully");
+            }
+        }
+        
+    } catch (error) {
+        next(error);
+}
+});
+
+
 
 module.exports = router;
