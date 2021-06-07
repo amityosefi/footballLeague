@@ -5,4 +5,12 @@ async function getAllReferees(){
     `select * from dbo.referees`);
   }
 
+  
+function getReferee(Rname){
+    return DButils.execQuery(
+        `SELECT name FROM dbo.referees WHERE name = '${Rname}'`
+    );
+}
+
 exports.getAllReferees = getAllReferees;
+exports.getReferee = getReferee;
