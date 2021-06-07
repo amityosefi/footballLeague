@@ -1,0 +1,916 @@
+openapi: 3.0.0
+info:
+  title: api
+  description: API for  project
+  version: 1.0.0
+tags:
+  - name: Users
+  - name: Auth
+  - name: league
+  - name: Teams
+  - name: manager
+  - name: players
+  - name: coaches
+paths:
+  /Register:
+    post:
+      tags:
+        - Auth
+      summary: Add new user
+      description: A new user from the client is added to the server
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "201":
+          description: A new user has been added
+        "400":
+          description: wrong input parameters
+  /Login:
+    post:
+      tags:
+        - Auth
+      summary: Login an exist user
+      description: An exist user login to the system
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginScheme"
+      responses:
+        "200":
+          description: >
+            User was found in the DB and authenitcated successfully.
+            The session ID is returned in a cookie named `session`. 
+            You should include this cookie in subsequent requests
+          # headers:
+          #   Set-Cookie:
+          #     schema:
+          #       type: string
+          #       example: session=87s97sdhgf279293f8w0e9
+            # Note that the Set-Cookie header and securitySchemes are not connected in any way, and the Set-Header definition is for documentation purposes only.
+        "401":
+          description: Authentication failed
+  /logout:
+    post:
+      tags:
+        - Auth
+      summary: logout a user from the system and delete his cookie
+      responses:
+        "200":
+          description: "the user has ben successfully logged out"
+
+  /league/getDetails:
+    get:
+      tags:
+        - league
+      summary: Return the details about the current league
+      responses:
+        "200":
+          description: data about the current league returned
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/League"
+        "400":
+          description: wrong input parameters
+  
+  /users/lastSearch:
+    get:
+      tags:
+        - Users
+      summary: Return the query and result of the last search
+      responses:
+        "200":
+          description: data about the last search
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/lastSearch"
+        "400":
+          description: wrong input parameters
+
+  /players/playerDetails/{playerId}:
+    get:
+      summary: get full deatils about a player
+      description: useful for player page
+      tags:
+        - players
+      parameters:
+        - in: path
+          name: playerId
+          description: player's id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: data about the player
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlayerFullDetails"
+        "404":
+          description: playerId is not exists
+
+  /coaches/coachDetails/{coachId}:
+    get:
+      summary: get full deatils about a coach
+      description: useful for coach page
+      tags:
+        - coaches
+      parameters:
+        - in: path
+          name: coachId
+          description: coach's id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: data about the coach
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CoachFullDetails"
+        "404":
+          description: playerId is not exists
+
+  /manager/addGame:
+    post:
+      tags:
+        - manager
+      summary: A union manager from client is add game to league
+      description: a JSON object contains gameId to add to league
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/addgame'
+        description: add new game
+      responses:
+        '201':
+          description: game has been added
+        '400':
+          description: incorrect inputs
+        '403':
+          description: The user doesnt have access to add game
+
+  /manager/addEvent:
+    post:
+      tags:
+        - manager
+      summary: A union manager from client is add game to league
+      description: a JSON object contains gameId to add to league
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/eventslog'
+        description: add new event
+      responses:
+        '201':
+          description: event has been added
+        '400':
+          description: incorrect inputs
+        '403':
+          description: The user doesnt have access to add game
+
+  /manager/addScore:
+    put:
+      tags:
+        - manager
+      summary: A union manager from client is add score to game
+      description: a JSON object contains score to add to game
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                gameId:
+                  type: int
+                  description: game id which the user saved
+                  example: 13
+                homegoal:
+                  type: int
+                  description: home goal
+                  example: 2
+                awaygoal:
+                  type: int
+                  description: away goal
+                  example: 1
+      responses:
+        '200':
+          description: score has been added to game
+        '400':
+          description: incorrect inputs
+        '403':
+          description: The user doesnt have access to add game
+          
+  /users/favoritePlayers:
+    get:
+      tags:
+        - Users
+      summary: Return the favorite players that were saved by user
+      parameters:
+      responses:
+        "200":
+          description: data about the user's favorites players returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlayerPreview"
+        "400":
+          description: There is no team with this id inputs
+
+    post:
+      summary: save player in the favorites list of a user
+      tags:
+        - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                playerId:
+                  type: int
+                  description: player's id which the user saved
+                  example: 82808
+      responses:
+        "201":
+          description: The player successfully saved as favorite
+        "400":
+          description: There is no player with this id
+
+  /users/favoriteGames:
+    get:
+      tags:
+        - Users
+      summary: Return the favorite games that were saved by user
+      parameters:
+      responses:
+        "200":
+          description: data about the user's favorites games returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/gamesFutureDetails"
+        "400":
+          description: There are no games in favorites
+    post:
+      summary: save game in the favorites list of a user
+      tags:
+        - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                gameId:
+                  type: int
+                  description: game's id which the user saved
+                  example: 939
+      responses:
+        "201":
+          description: The game successfully saved as favorite
+        "400":
+          description: incorrect inputs
+
+  /users/favoriteTeams:
+    get:
+      tags:
+        - Users
+      summary: Return the favorite teams that were saved by user
+      parameters:
+      responses:
+        "200":
+          description: data about the user's favorites teams returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/teamInfo"
+        "401":
+          description: user is not authorized
+
+    post:
+      summary: save team in the favorites list of a user
+      tags:
+        - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                teamId:
+                  type: int
+                  description: teams's id which the user saved
+                  example: 939
+      responses:
+        "201":
+          description: The team successfully saved as favorite
+        "400":
+          description: incorrect inputs
+
+  /users/searchByName/{Name}:
+    get:
+      summary: get details of players, teams and coaches with the name
+      description: useful for search page
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: Name
+          description: Name of the player/team/coach
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: data about the player/team/coach
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/search"
+        "404":
+          description: Name is not exists
+
+  /users/searchByNameFilterWithPositionId/{Name}/{positionId}:
+    get:
+      summary: get details of players with the name and position Id
+      description: useful for search page
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: Name
+          description: Name of the player
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: positionId
+          description: position of the player
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: data about the player
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/searchFilterWithPosition"
+        "404":
+          description: player with this name and position is not exists
+    
+  /users/searchByNameFilterWithTeamName/{Name}/{teamName}:
+    get:
+      summary: get details of players and coaches with the name and team name
+      description: useful for search page
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: Name
+          description: Name of the player/coach
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: teamName
+          description: team name of the player
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: data about the player/coach
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/searchFilterWithTeamName"
+        "404":
+          description: player or coach with this name and team name not exists
+
+  /teams/teamDetails/{teamId}:
+    get:
+      summary: get full deatils about a team
+      description: useful for team page
+      tags:
+        - Teams
+      parameters:
+        - in: path
+          name: teamId
+          description: team's id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: data about the team
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/teamDetails"
+        "404":
+          description: teamId is not exists
+
+  /league/pastgames:
+    get:
+      tags:
+        - league
+      summary: Return the past games in the league
+      parameters:
+      responses:
+        "200":
+          description: data about the past game's returned
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/gamesPastDetails"
+
+  /league/futuregames:
+    get:
+      tags:
+        - league
+      summary: Return the future games in the league
+      parameters:
+      responses:
+        "200":
+          description: data about the future game's returned
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/gamesFutureDetails"
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        username:
+          maxLength: 8
+          minLength: 3
+          type: string
+          description: username conatins between 3 to 8 letters only
+          example: ladygaga
+        firstname:
+          type: string
+          description: user's first name
+          example: Stefani
+        lastname:
+          type: string
+          description: user's last name
+          example: Germanotta
+        country:
+          type: string
+          description: user's country
+          example: USA
+        password:
+          maxLength: 10
+          minLength: 5
+          type: string
+          description:
+            password conatins between 5 to 10 chars, at least one of them
+            is a number and a special char
+          format: password
+          example: lady@56
+        email:
+          pattern: email
+          type: string
+          description: user's email
+          example: ladygaga@gmail.com
+        imageUrl:
+          pattern: URL
+          type: string
+          description: URL for the user's image
+          example: https://cloudinary.com/
+      description: Model containing user info
+      
+    LoginScheme:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 8
+          description: username conatins letters only
+          example: ladygaga
+        password:
+          type: string
+          minLength: 5
+          maxLength: 10
+          format: password
+          description: password conatins at least one number and one special char
+          example: lady@56
+
+    League:
+      type: object
+      properties:
+        league_name:
+          type: string
+          description: league name
+          example: Superliga
+        current_season_name:
+          type: string
+          description: current season name
+          example: "2020/2021"
+        current_stage_name:
+          type: string
+          description: current stage name
+          example: Championship Round
+        nextGame:
+          type: object
+          $ref: "#/components/schemas/gamesFutureDetails"
+
+    lastSearch:
+      type: object
+      properties:
+        query:
+          type: string
+          description: the query of the search
+          example: /searchByName/jess
+        result:
+          type: object
+          $ref: "#/components/schemas/searchFilterWithTeamName"
+
+    PlayerPreview:
+      type: object
+      properties:
+        player_id:
+          type: integer
+          description: player's id
+          example: 456421
+        full_name:
+          type: string
+          description: player's full name
+          example: Jess Thorup
+        image:
+          type: string
+          description: player's image
+          format: URL
+          example: "https://cdn.sportmonks.com/images/soccer/placeholder.png"
+        position:
+          type: integer
+          description: player's position in team
+          example: 9
+        team_name:
+          type: string
+          description: player's team name
+          example: København
+
+    PlayerFullDetails:
+      type: object
+      properties:
+        player_id:
+          type: integer
+          description: player's id
+          example: 82808
+        full_name:
+          type: string
+          description: player's full name
+          example: Jesper Hansen
+        image:
+          type: string
+          description: player's image
+          format: URL
+          example: "https://cdn.sportmonks.com/images/soccer/players/24/82808.png"
+        position:
+          type: integer
+          description: player's position in team
+          example: 1
+        team_name:
+          type: string
+          description: player's team name
+          example: Midtjylland
+        common_name:
+          type: string
+          description: player's common name
+          example: J. Hansen
+        nationality:
+          type: string
+          description: player's nationality
+          format: string
+          example: Denmark
+        birthdate:
+          type: string
+          description: player's birthdate
+          example: 31/03/1985
+        birthcountry:
+          type: string
+          description: player's birthcountry
+          example: Denmark
+        height:
+          type: string
+          description: player's height
+          example: 88 cm
+        weight:
+          type: string
+          description: player's weight
+          example: 78 kg
+
+    CoachPreview:
+      type: object
+      properties:
+        coach_id:
+          type: integer
+          description: coach's id
+          example: 456421
+        full_name:
+          type: string
+          description: coach's full name
+          example: Jess Thorup
+        team_name:
+          type: string
+          description: coach's team name
+          example: København
+        image:
+          type: string
+          description: coach's image
+          format: URL
+          example: null
+
+    CoachFullDetails:
+      type: object
+      properties:
+        coach_id:
+          type: integer
+          description: coach's id
+          example: 456421
+        full_name:
+          type: string
+          description: coach's full name
+          example: Jess Thorup
+        team_name:
+          type: string
+          description: coach's team name
+          example: København
+        image:
+          type: string
+          description: coach's image
+          format: URL
+          example: null
+        common_name:
+          type: string
+          description: coach's common name
+          example: J. Thorup
+        nationality:
+          type: string
+          description: coach's nationality
+          format: string
+          example: Denmark
+        birthdate:
+          type: string
+          description: coach's birthdate
+          example: 21/02/1970
+        birthcountry:
+          type: string
+          description: coach's birthcountry
+          example: Denmark
+
+    teamDetails:
+      type: object
+      properties:
+        players:
+          type: array
+          items:
+            type: object
+            $ref: "#/components/schemas/PlayerPreview"
+        coach:
+          type: object
+          description: coach details
+          properties:
+            coach_name:
+              type: string
+              example: Brian Priske Pedersen
+              description: the coach name of the team
+            coach_id:
+              type: integer
+              example: 82974
+              description: the coach id of the team
+            games:
+              type: object
+              description: past and future games of the team
+              properties:
+                past_team_games:
+                  type: array
+                  items:
+                    type: object
+                    $ref: "#/components/schemas/gamesPastDetails"
+                future_team_games:
+                  type: array
+                  items:
+                    type: object
+                    $ref: "#/components/schemas/gamesFutureDetails"
+
+    teamInfo:
+      type: object
+      properties:
+        team_id:
+          type: integer
+          example: Midtjylland
+          description: id of the team
+        team_name:
+          type: string
+          example: Midtjylland
+          description: the name of the team
+        team_logo:
+          type: string
+          description: team's logo
+          format: URL
+          example: https://cdn.sportmonks.com/images//soccer/teams/11/939.png
+
+    search:
+      type: object
+      properties:
+        players:
+          type: array
+          items:
+            type: object
+            $ref: "#/components/schemas/PlayerPreview"
+        teams:
+          type: array
+          items:
+            type: object
+            $ref: "#/components/schemas/teamInfo"
+        coaches:
+          type: array
+          items:
+            type: object
+            $ref: "#/components/schemas/CoachPreview"
+
+    searchFilterWithPosition:
+      type: array
+      items:
+        type: object
+        $ref: "#/components/schemas/PlayerPreview"   
+        
+    searchFilterWithTeamName:
+      type: object
+      properties:
+        players:
+          type: array
+          items:
+            type: object
+            $ref: "#/components/schemas/PlayerPreview"
+        coaches:
+          type: array
+          items:
+            type: object
+            $ref: "#/components/schemas/CoachPreview"
+            
+    gamesPastDetails:
+      type: array
+      items:
+        type: object
+        description: Contains past game
+        properties:
+          gameID:
+            type: integer
+            example: 10
+            description: id of the game
+          gamedate:
+            type: date
+            example: "2015-12-26"
+            description: date
+          gametime:
+            type: string
+            example: 15:45:20
+            description: time
+          hometeamID:
+            type: integer
+            example: 85
+            description: time
+          awayteamID:
+            type: integer
+            example: 86
+            description: time
+          field:
+            type: string
+            example: Parken
+            description: time
+          homeGoal:
+            type: int
+            example: 3
+            description: home score game
+          awayGoal:
+            type: int
+            example: 1
+            description: away score game
+          referee:
+            type: string
+            example: Willie Collum
+            description: referee of the game  
+          stage:
+            type: string
+            example: Championship Round
+            description: stage of the game
+
+    gamesFutureDetails:
+      type: array
+      items:
+        type: object
+        description: Contains future game
+        properties:
+          gameID:
+            type: integer
+            example: 12
+            description: id of the game
+          gamedate:
+            type: date
+            example: "2021-11-11"
+            description: date
+          gametime:
+            type: string
+            example: 20:00:00
+            description: time
+          hometeamID:
+            type: integer
+            example: 939
+            description: home team id
+          awayteamID:
+            type: integer
+            example: 1020
+            description: away team id
+          field:
+            type: string
+            example: JYSK park
+            description: field of the games  
+          referee:
+            type: string
+            example: Bobby Madden
+            description: referee of the game  
+          stage:
+            type: string
+            example: Championship Round
+            description: stage of the game
+
+    addgame:
+      type: object
+      description: Contains data on new game
+      properties:
+        gamedate:
+          type: string
+          example: '2022-12-10'
+          description: the date of the game
+        gametime:
+          type: string
+          example: '20:45:00'
+          description: the time of the game
+        hometeamID:
+          type: integer
+          example: 86
+          description: id of home team
+        awayteamID:
+          type: integer
+          example: 85
+          description: id of away team
+        field:
+          type: string
+          example: Parken
+          description: field
+        referee:
+          type: string
+          example: Andrew Dallas
+          description: referee
+
+    eventslog:
+      type: object
+      description: Contains game events
+      properties:
+        gameID:
+          type: integer
+          example: 10
+          description: the id of the game
+        eventminute:
+          type: integer
+          example: 10
+          description: the minute of the game
+        dataevent:
+          type: string
+          example: goal
+          description: event
+        playerID:
+          type: integer
+          example: 82808
+          description: the id of the player who did the event
