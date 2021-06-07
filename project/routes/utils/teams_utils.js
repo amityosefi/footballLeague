@@ -105,7 +105,24 @@ async function getTeamGames(teamID) {
   
   }
 
+  async function get_stadium(teamID) {
+    const team = await axios.get(
+      `https://soccer.sportmonks.com/api/v2.0/teams/${teamID}`,
+      {
+        params: {
+          include: "venue",
+          api_token: process.env.api_token,
+        },
+      }
+    );
+  
+    return team.data.data.venue.data.name;
+  }
+  
+  
+
   exports.getTeamGames = getTeamGames;
   exports.get_team_info = get_team_info;
   exports.get_team_info_by_name = get_team_info_by_name;
+  exports.get_stadium = get_stadium;
 
