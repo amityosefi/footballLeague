@@ -176,7 +176,7 @@ router.post("/appointReferee", async (req, res, next) => {
                 res.status(400).send("user does not exist");
             else{
                 const name = user.firstname + " " + user.lastname;
-                await DButils.execQuery(`insert into dbo.referees values ('${name}')`);
+                await referee_utils.addReferee(name);
                 res.status(200).send("referee appointed successfully");
             }
         }
