@@ -1,11 +1,5 @@
-
-
-
-function sumTestFunction(a,b){
-    return a + b;
-}
-
-
+const axios = require("axios");
+const DButils = require("./DButils");
 
 function shiftTeams(arr){
 
@@ -37,7 +31,7 @@ function shiftTeams(arr){
 }
 
 
-function doSchedule(teams, referees, stadiums) {
+function doSchedule(teams, referees, stadiums, rounds) {
     // function that create league schedule
 
     // initial 2D arrays
@@ -56,39 +50,84 @@ function doSchedule(teams, referees, stadiums) {
 
     // make stage half of the teams length, and cluster two teams to one game
     let stages = []; // each index = one stage
+    let stages2;
     for(let i = 0; i < teams.length - 1; i++){
         let stage = new Array(teams.length/2);
         for(let j = 0; j < teams.length / 2; j++){
-            stage[j] = [arr[0][j] , arr[1][j]];
+            let x = arr[0][j];
+            stage[j] = [setDate(j, i) ,setTime(j), arr[0][j] , arr[1][j], referees[j], stadiums[arr[0][j]], i + 1];
         }
         stages[i] = stage;
         arr = shiftTeams(arr);
-    }    
-    return stages;
+    }
+    if (rounds == 1){
+        return stages;
+    }
+    else{
+        stages2 = secondRound(stages, referees, stadiums);
+        return stages.concat(stages2);
+        
+    }
+    
 }
 
-function secondRound(stages){
+function secondRound(stages, referees, stadiums){
 
     let stages2 = new Array(stages.length);
 
     for(let i = 0; i < stages.length; i++){
         let stage = new Array(stages[0].length);
         for(let j = 0; j < stages[0].length; j++){
-            stage[j] = [stages[i][j][1], stages[i][j][0]];
+            stage[j] = [setDate(j, i + stages.length) ,setTime(j), stages[i][j][3], stages[i][j][2], referees[j], stadiums[stages[i][j][3]], stages.length+ i + 1];
         }
         stages2[i] = stage;
     }
     return stages2
 }
 
-let teams_stadiums = league_utils.get_all_teams();
-let stages1 = doSchedule([1,2,3,4,5,6,7,8,9,10], ['a', 'b'], ['a', 'b']);
-let stages2 = secondRound(stages1);
+function setDate(i, stage){
+    let day;
+    let month;
+    let year = "2021"
+    switch(i) {
+        case 0:
+        case 1:
+        case 2:
+            day = 1 + ~~(stage % 4) * 7;
+            month = 9 + ~~(stage / 4);
+            if (month > 12){
+                month = 4 - ~~(stage / 4) + 1;
+                year = "2022";
+            }
+            break;
+        case 3:
+        case 4:
+        case 5:
+            day = 2 + 1 * ~~(stage % 4) * 7;
+            month = 9 + ~~(stage / 4);
+            if (month > 12){
+                month = 4 - ~~(stage / 4) + 1;
+                year = "2022";
+            }
+            break;
+      }
+      const x = year + ":" + String(month) + ":" + String(day);
+      return x;
+}
 
-console.log(stages);
-console.log(stages2);
+function setTime(i){
+    switch(i) {
+        case 0:
+        case 3:
+          return "17:00:00";
+        case 1:
+        case 4:
+            return "19:00:00";
+        case 2:
+        case 5:
+            return "21:00:00";
+      }
+}
 
-let league_games = stages1 + stages2;
 
-module.exports = doSchedule;
-module.exports = sumTestFunction;
+exports.doSchedule = doSchedule;

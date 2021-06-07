@@ -1,7 +1,9 @@
 var express = require("express");
 var router = express.Router();
 const DButils = require("../routes/utils/DButils");
-
+const league_utils = require("./utils/league_utils");
+const manager_utils = require("./utils/manager_utils");
+const referees_utils = require("./utils/referees_utils");
 
 router.use(async function (req, res, next) {
     if (req.session && req.session.user_id) {
@@ -171,5 +173,30 @@ router.post("/addEvent", async (req, res, next) => {
         next(error);
     }
 });
+
+router.post("/set_schedule", async (req, res, next) => {
+    try {
+        const user_id = req.session.user_id;
+        const rounds = req.body.rounds;
+        if (isNaN(rounds)){
+            throw { status: 400, message: "incorrect inputs" };
+        }
+        const teams_stadiums = await league_utils.get_all_teams();
+        // const referees = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+        const referees = await referees_utils.getAllReferees();
+        let teams = [];
+        let stadiums = new Object();
+        for(let i = 0; i < teams_stadiums.length; i ++){
+            teams.push(teams_stadiums[i][0]);
+            stadiums[teams_stadiums[i][0]] =  teams_stadiums[i][1];
+        }
+        const ans = await manager_utils.doSchedule(teams, referees, stadiums, rounds);
+        res.status(201).send(ans);
+    } catch (error) {
+        next(error);
+    }
+  });
+
+
 
 module.exports = router;
