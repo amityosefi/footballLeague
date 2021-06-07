@@ -215,7 +215,43 @@ paths:
           description: incorrect inputs
         '403':
           description: The user doesnt have access to add game
-          
+  /manager/viewAllUsers:
+    get:
+      tags:
+        - manager
+      summary: manager can view all users in the system
+      responses:
+        "200":
+          description: all users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/user"
+        "401":
+          description: unauthorized
+  /manager/appointReferee:
+    post:
+      tags:
+        - manager
+      summary: manager appoints a user to be a referee
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userID:
+                  type: int
+                  description: user id to appoint as referee
+                  example: 1
+      responses:
+        '201':
+          description: referee appointed successfully
+        "401":
+          description: unauthorized
+
   /users/favoritePlayers:
     get:
       tags:
@@ -914,3 +950,22 @@ components:
           type: integer
           example: 82808
           description: the id of the player who did the event
+
+    user:
+      type: object
+      description: user details
+      properties:
+        userID:
+          type: integer
+          example: 1
+        username:
+          type: string
+          example: shahar
+        firstname:
+          type: string
+          example: sha
+        lastname:
+          type: string
+          example: hor
+
+

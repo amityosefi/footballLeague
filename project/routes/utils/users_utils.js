@@ -49,7 +49,18 @@ async function getFavoritegameDetails(gameID){
     // eventsdetails: events
   };
 }
+async function getUsers(){
+  return await DButils.execQuery(
+  `select user_id, username, firstname, lastname from dbo.users`);
+}
+
+async function getUserByID(user_id){
+  return await DButils.execQuery(
+  `select user_id, firstname, lastname from dbo.users where user_id='${user_id}'`);
+}
 
 exports.getFavoritegameDetails = getFavoritegameDetails;
 exports.markAsFavorite = markAsFavorite;
 exports.getFavorite = getFavorite;
+exports.getUsers = getUsers;
+exports.getUserByID = getUserByID;
