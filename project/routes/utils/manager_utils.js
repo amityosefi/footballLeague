@@ -1,5 +1,6 @@
 const axios = require("axios");
 const DButils = require("./DButils");
+let api_domain = 'https://soccer.sportmonks.com/api/v2.0';
 
 function shiftTeams(arr){
 
@@ -53,9 +54,13 @@ function doSchedule(teams, referees, stadiums, rounds) {
     let stages2;
     for(let i = 0; i < teams.length - 1; i++){
         let stage = new Array(teams.length/2);
+        let chosen_referees = chooseReferees(referees);
         for(let j = 0; j < teams.length / 2; j++){
             let x = arr[0][j];
-            stage[j] = [setDate(j, i) ,setTime(j), arr[0][j] , arr[1][j], referees[j], stadiums[arr[0][j]], i + 1];
+            if (typeof referees[chosen_referees[j]].name == 'undefined'){
+                let x = 9;
+            }
+            stage[j] = [setDate(j, i) ,setTime(j), arr[0][j] , arr[1][j], referees[chosen_referees[j]].name, stadiums[arr[0][j]], i + 1];
         }
         stages[i] = stage;
         arr = shiftTeams(arr);
@@ -77,12 +82,21 @@ function secondRound(stages, referees, stadiums){
 
     for(let i = 0; i < stages.length; i++){
         let stage = new Array(stages[0].length);
+        let chosen_referees = chooseReferees(referees);
         for(let j = 0; j < stages[0].length; j++){
-            stage[j] = [setDate(j, i + stages.length) ,setTime(j), stages[i][j][3], stages[i][j][2], referees[j], stadiums[stages[i][j][3]], stages.length+ i + 1];
+            stage[j] = [setDate(j, i + stages.length) ,setTime(j), stages[i][j][3], stages[i][j][2], referees[chosen_referees[j]].name, stadiums[stages[i][j][3]], stages.length+ i + 1];
         }
         stages2[i] = stage;
     }
     return stages2
+}
+function chooseReferees(referees){
+    let arr = [];
+    while(arr.length < 6){
+        var r = Math.floor(Math.random() * referees.length -1) + 1;
+        if(arr.indexOf(r) === -1) arr.push(r);
+    }
+    return arr;
 }
 
 function setDate(i, stage){
@@ -111,6 +125,12 @@ function setDate(i, stage){
             }
             break;
       }
+      if (day < 10){
+          day = "0" + String(day);
+      }
+      if (month < 10){
+        month = "0" + String(month);
+    }
       const x = year + ":" + String(month) + ":" + String(day);
       return x;
 }
@@ -129,9 +149,6 @@ function setTime(i){
       }
 }
 
-
-exports.doSchedule = doSchedule;
-let api_domain = 'https://soccer.sportmonks.com/api/v2.0';
 
 
 function getStadium(name){
@@ -194,6 +211,7 @@ function checkExistanceGame(games, req){
     return true;
 }
 
+exports.doSchedule = doSchedule;
 
 async function sendGameIntoDB(Gamedate, Gametime, HometeamID, AwayteamID, Field, Referee){
     await DButils.execQuery(
