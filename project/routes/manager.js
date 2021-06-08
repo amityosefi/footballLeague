@@ -4,6 +4,7 @@ const DButils = require("../routes/utils/DButils");
 const league_utils = require("./utils/league_utils");
 const manager_utils = require("./utils/manager_utils");
 const referees_utils = require("./utils/referees_utils");
+const users_utils = require("./utils/users_utils");
 
 const ManagUtils = require("../routes/utils/manager_utils");
 
@@ -180,6 +181,22 @@ router.post("/set_schedule", async (req, res, next) => {
         next(error);
     }
   });
+
+router.get("/viewAllUsers", async (req, res, next) => {
+    try {
+        const user_id = req.session.user_id;
+        if (user_id != 2) {
+            res.status(403).send("The user doesnt have access to add game")
+        }
+        else {
+            const users = await users_utils.getUsers();
+            res.status(200).send(users);
+        }
+
+    } catch (error) {
+        next(error);
+    }
+});
 
 
 router.post("/appointReferee", async (req, res, next) => {
