@@ -154,7 +154,7 @@ router.post("/set_schedule", async (req, res, next) => {
         if (isNaN(rounds)){
             throw { status: 400, message: "incorrect inputs" };
         }
-        if (rounds != 1 || rounds != 2){
+        if (!(rounds != 1) && !(rounds != 2)){
             throw { status: 400, message: "incorrect inputs" };
         }
         const teams_stadiums = await league_utils.get_all_teams();
