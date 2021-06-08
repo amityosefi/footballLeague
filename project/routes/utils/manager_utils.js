@@ -213,6 +213,17 @@ function checkExistanceGame(games, req){
 }
 
 exports.doSchedule = doSchedule;
+
+async function sendGameIntoDB(Gamedate, Gametime, HometeamID, AwayteamID, Field, Referee){
+    await DButils.execQuery(
+        `INSERT INTO dbo.games (gamedate, gametime, hometeamID, awayteamID, field, homegoal, awaygoal, referee, stage) VALUES ('${Gamedate}','${Gametime}', '${HometeamID}','${AwayteamID}','${Field}', NULL, NULL, '${Referee}', 'Championship Round')`
+    );
+}
+
+
+
+
+
 exports.getStadium = getStadium;
 exports.getAllMatches = getAllMatches;
 exports.validParameters = validParameters;
