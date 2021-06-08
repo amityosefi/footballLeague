@@ -93,7 +93,7 @@ function secondRound(stages, referees, stadiums){
 function chooseReferees(referees){
     let arr = [];
     while(arr.length < 6){
-        var r = Math.floor(Math.random() * referees.length) + 1;
+        var r = Math.floor(Math.random() * referees.length -1) + 1;
         if(arr.indexOf(r) === -1) arr.push(r);
     }
     return arr;
