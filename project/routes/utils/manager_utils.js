@@ -132,7 +132,6 @@ function setTime(i){
 
 exports.doSchedule = doSchedule;
 let api_domain = 'https://soccer.sportmonks.com/api/v2.0';
-const DButils = require("./DButils");
 
 
 
@@ -174,7 +173,7 @@ function validParameters(gamedate, fieldgame, refereegame){
         throw {status:201, message: "There is no stadium with this name"};
     }
     else if (refereegame.length == 0){
-    throw {status:201, message: "There is no referee with this name"};
+        throw {status:201, message: "There is no referee with this name"};
     }
 }
 
@@ -202,6 +201,8 @@ async function sendGameIntoDB(Gamedate, Gametime, HometeamID, AwayteamID, Field,
         `INSERT INTO dbo.games (gamedate, gametime, hometeamID, awayteamID, field, homegoal, awaygoal, referee, stage) VALUES ('${Gamedate}','${Gametime}', '${HometeamID}','${AwayteamID}','${Field}', NULL, NULL, '${Referee}', 'Championship Round')`
     );
 }
+
+
 
 
 

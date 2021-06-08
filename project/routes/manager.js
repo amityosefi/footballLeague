@@ -34,7 +34,7 @@ router.post("/addGame", async (req, res, next) => {
             ManagUtils.checkInput(req.body.gamedate, req.body.gametime, req.body.hometeamID, req.body.awayteamID, req.body.field, req.body.referee);
             
             const fieldgame = await ManagUtils.getStadium(req.body.field);
-            const refereegame = await referee_utils.getReferee(req.body.referee);
+            const refereegame = await referees_utils.getReferee(req.body.referee);
 
             ManagUtils.validParameters(req.body.gamedate, fieldgame, refereegame);
 
@@ -48,24 +48,7 @@ router.post("/addGame", async (req, res, next) => {
                 res.status(201).send("game has been added");
             }
             else{
-<<<<<<< HEAD
-                res.status(201).send("game can not be added");
-=======
-                const games = await ManagUtils.getAllMatches();
-    
-
-                let flag = checkExistanceGame(games, req);
-
-                if(flag){
-                    await DButils.execQuery(
-                        `INSERT INTO dbo.games (gamedate, gametime, hometeamID, awayteamID, field, homegoal, awaygoal, referee, stage) VALUES ('${req.body.gamedate}','${req.body.gametime}', '${req.body.hometeamID}','${req.body.awayteamID}','${req.body.field}', NULL, NULL, '${req.body.referee}', 'Championship Round')`
-                    );
-                    res.status(201).send("game has been added");
-                }
-                else{
-                    res.status(201).send("game can not be added");
-                }
->>>>>>> 6a261ae4bd85fda62fbfe05d7837ab7b566ffde9
+                res.status(201).send("game already exists");
             }
             
      
