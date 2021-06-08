@@ -169,9 +169,8 @@ function getAllMatches(){
 function validParameters(gamedate, fieldgame, refereegame){
     let dateReg = /^\d{4}[./-]\d{2}[./-]\d{2}$/;
     let isdatevalid = dateReg.test(gamedate);
-    console.log(gamedate);
     if(!isdatevalid){
-        res.status(201).send("The date is not valid");
+        throw {status:201, message: "The date is not valid"};
     }
 
     let fields = gamedate.split('-');
@@ -179,19 +178,19 @@ function validParameters(gamedate, fieldgame, refereegame){
     let month = fields[1];
     let day = fields[2];
     if(month >12 || month<0 ){
-        res.status(201).send("The month is not valid");
+        throw {status:201, message: "The month is not valid"};
     }
     if(day >31 || day<0 ){
-        res.status(201).send("The day is not valid");
+        throw {status:201, message: "The day is not valid"};
     }
     if(year < 2021 || year> 2022){
-        res.status(201).send("The year should be 2021 or 2022");
+        throw {status:201, message: "The year should be 2021 or 2022"};
     }
     else if (fieldgame.length == 0 ){
-        res.status(201).send("There is no stadium with this name");
+        throw {status:201, message: "There is no stadium with this name"};
     }
     else if (refereegame.length == 0){
-        res.status(201).send("There is no referee with this name");
+        throw {status:201, message: "There is no referee with this name"};
     }
 }
 
@@ -202,7 +201,7 @@ function checkInput(gamedate, gametime, hometeamID, awayteamID, field, referee){
 }
 
 
-function checkExistanceGame(Games, req){
+function checkExistanceGame(games, req){
     for(let i = 0 ; i< games.length; i++){
         if(String(games[i].gamedate) == req.body.gamedate){
             if (games[i].hometeamID == req.body.hometeamID || games[i].hometeamID == req.body.awayteamID || games[i].awayteamID == req.body.hometeamID || games[i].awayteamID == req.body.awayteamID || games[i].referee == req.body.referee || games[i].field == req.body.field){
@@ -219,3 +218,4 @@ exports.getAllMatches = getAllMatches;
 exports.validParameters = validParameters;
 exports.checkInput = checkInput;
 exports.checkExistanceGame = checkExistanceGame;
+exports.sendGameIntoDB = sendGameIntoDB;
