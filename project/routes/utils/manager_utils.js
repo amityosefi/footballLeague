@@ -1,5 +1,6 @@
 const axios = require("axios");
 const DButils = require("./DButils");
+let api_domain = 'https://soccer.sportmonks.com/api/v2.0';
 
 function shiftTeams(arr){
 
@@ -111,6 +112,12 @@ function setDate(i, stage){
             }
             break;
       }
+      if (day < 10){
+          day = "0" + String(day);
+      }
+      if (month < 10){
+        dmonthay = "0" + String(month);
+    }
       const x = year + ":" + String(month) + ":" + String(day);
       return x;
 }
@@ -129,10 +136,6 @@ function setTime(i){
       }
 }
 
-
-exports.doSchedule = doSchedule;
-let api_domain = 'https://soccer.sportmonks.com/api/v2.0';
-const DButils = require("./DButils");
 
 
 
@@ -197,6 +200,7 @@ function checkExistanceGame(Games, req){
     return true;
 }
 
+exports.doSchedule = doSchedule;
 exports.getStadium = getStadium;
 exports.getAllMatches = getAllMatches;
 exports.validParameters = validParameters;
