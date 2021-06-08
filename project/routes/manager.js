@@ -154,9 +154,14 @@ router.post("/set_schedule", async (req, res, next) => {
         if (isNaN(rounds)){
             throw { status: 400, message: "incorrect inputs" };
         }
+        if (rounds != 1 || rounds != 2){
+            throw { status: 400, message: "incorrect inputs" };
+        }
         const teams_stadiums = await league_utils.get_all_teams();
-        // const referees = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
         const referees = await referees_utils.getAllReferees();
+        if (referees.length < 6){
+            throw { status: 400, message: "There are not enough referees in that league" };
+        }
         let teams = [];
         let stadiums = new Object();
         for(let i = 0; i < teams_stadiums.length; i ++){
