@@ -32,7 +32,7 @@ function shiftTeams(arr){
 }
 
 
-function doSchedule(teams, referees, stadiums, rounds) {
+async function doSchedule(teams, referees, stadiums, rounds) {
     // function that create league schedule
 
     // initial 2D arrays
@@ -57,10 +57,7 @@ function doSchedule(teams, referees, stadiums, rounds) {
         let chosen_referees = chooseReferees(referees);
         for(let j = 0; j < teams.length / 2; j++){
             let x = arr[0][j];
-            if (typeof referees[chosen_referees[j]].name == 'undefined'){
-                let x = 9;
-            }
-            stage[j] = [setDate(j, i) ,setTime(j), arr[0][j] , arr[1][j], referees[chosen_referees[j]].name, stadiums[arr[0][j]], i + 1];
+            stage[j] = [setDate(j, i) ,setTime(j), arr[0][j] , arr[1][j], stadiums[arr[0][j]], referees[chosen_referees[j]].name, i + 1];
         }
         stages[i] = stage;
         arr = shiftTeams(arr);
@@ -70,8 +67,12 @@ function doSchedule(teams, referees, stadiums, rounds) {
     }
     else{
         stages2 = secondRound(stages, referees, stadiums);
-        return stages.concat(stages2);
+        stages = stages.concat(stages2);
         
+    }
+    for (let i = 0; i < stages.length; i++){ 
+        for (let j = 0; j < stages[0].length; j++)
+        await sendGameIntoDB(stages[i][j][0], stages[i][j][1], stages[i][j][2], stages[i][j][3], stages[i][j][4], stages[i][j][5], stages[i][j][6]); 
     }
     
 }
@@ -84,7 +85,7 @@ function secondRound(stages, referees, stadiums){
         let stage = new Array(stages[0].length);
         let chosen_referees = chooseReferees(referees);
         for(let j = 0; j < stages[0].length; j++){
-            stage[j] = [setDate(j, i + stages.length) ,setTime(j), stages[i][j][3], stages[i][j][2], referees[chosen_referees[j]].name, stadiums[stages[i][j][3]], stages.length+ i + 1];
+            stage[j] = [setDate(j, i + stages.length) ,setTime(j), stages[i][j][3], stages[i][j][2], stadiums[stages[i][j][3]],  referees[chosen_referees[j]].name, stages.length+ i + 1];
         }
         stages2[i] = stage;
     }
@@ -110,7 +111,7 @@ function setDate(i, stage){
             day = 1 + ~~(stage % 4) * 7;
             month = 9 + ~~(stage / 4);
             if (month > 12){
-                month = 4 - ~~(stage / 4) + 1;
+                month = ~~(stage / 4) -3;
                 year = "2022";
             }
             break;
@@ -120,7 +121,7 @@ function setDate(i, stage){
             day = 2 + 1 * ~~(stage % 4) * 7;
             month = 9 + ~~(stage / 4);
             if (month > 12){
-                month = 4 - ~~(stage / 4) + 1;
+                month = ~~(stage / 4) -3;
                 year = "2022";
             }
             break;
@@ -213,9 +214,9 @@ function checkExistanceGame(games, req){
 
 exports.doSchedule = doSchedule;
 
-async function sendGameIntoDB(Gamedate, Gametime, HometeamID, AwayteamID, Field, Referee){
+async function sendGameIntoDB(Gamedate, Gametime, HometeamID, AwayteamID, Field, Referee, stage){
     await DButils.execQuery(
-        `INSERT INTO dbo.games (gamedate, gametime, hometeamID, awayteamID, field, homegoal, awaygoal, referee, stage) VALUES ('${Gamedate}','${Gametime}', '${HometeamID}','${AwayteamID}','${Field}', NULL, NULL, '${Referee}', 'Championship Round')`
+        `INSERT INTO dbo.games (gamedate, gametime, hometeamID, awayteamID, field, homegoal, awaygoal, referee, stage) VALUES ('${Gamedate}','${Gametime}', ${HometeamID}, ${AwayteamID},'${Field}', NULL, NULL, '${Referee}', ${stage})`
     );
 }
 

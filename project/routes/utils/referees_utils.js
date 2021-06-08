@@ -6,17 +6,17 @@ async function getAllReferees(){
   }
 
   
-async function getReferee(Rname){
+async function getReferee(id){
     return await DButils.execQuery(
-        `SELECT name FROM dbo.referees WHERE name = '${Rname}'`
+        `SELECT * FROM dbo.referees WHERE referee_id = '${id}'`
     );
 }
 
-async function addReferee(name){
-    const ref = await getReferee(name);
+async function addReferee(id, name){
+    const ref = await getReferee(id);
     if (ref.length != 0)
         throw {status: 400, message: "referee already exists"};
-    await DButils.execQuery(`insert into dbo.referees values ('${name}')`);
+    await DButils.execQuery(`insert into dbo.referees values (${id}, '${name}')`);
 }
 exports.getAllReferees = getAllReferees;
 exports.getReferee = getReferee;

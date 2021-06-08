@@ -147,6 +147,9 @@ router.post("/addEvent", async (req, res, next) => {
 router.post("/set_schedule", async (req, res, next) => {
     try {
         const user_id = req.session.user_id;
+        if (user_id != 2) {
+            throw{status:403, message: "The user doesnt have access to add game"};
+        }
         const rounds = req.body.rounds;
         if (isNaN(rounds)){
             throw { status: 400, message: "incorrect inputs" };
@@ -160,8 +163,8 @@ router.post("/set_schedule", async (req, res, next) => {
             teams.push(teams_stadiums[i][0]);
             stadiums[teams_stadiums[i][0]] =  teams_stadiums[i][1];
         }
-        const ans = await manager_utils.doSchedule(teams, referees, stadiums, rounds);
-        res.status(201).send(ans);
+        await manager_utils.doSchedule(teams, referees, stadiums, rounds);
+        res.status(201).send("games added successfully");
     } catch (error) {
         next(error);
     }
@@ -198,7 +201,7 @@ router.post("/appointReferee", async (req, res, next) => {
                 res.status(400).send("user does not exist");
             else{
                 const name = user.firstname + " " + user.lastname;
-                await referee_utils.addReferee(name);
+                await referees_utils.addReferee(user_id, name);
                 res.status(200).send("referee appointed successfully");
             }
         }
