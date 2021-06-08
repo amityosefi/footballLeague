@@ -53,7 +53,43 @@ async function getLeagueDetails() {
   };
 }
 
+async function get_all_teams() {
+  if (typeof SEASON_ID == 'undefined'){
+    SEASON_ID = 18334;
+  }
+  const teams = await axios.get(
+    `  https://soccer.sportmonks.com/api/v2.0/teams/season/${SEASON_ID}`,
+    {
+      params: {
+        api_token: process.env.api_token,
+      },
+    }
+  );
+  let stadiums = [];
+  for (let i=0; i < teams.data.data.length; i++){
+    let stadium = await get_stadium(teams.data.data[i].id);
+    stadiums.push([teams.data.data[i].id, stadium]);
+  }
 
+  return await Promise.all(stadiums);
+}
+
+async function get_stadium(teamID) {
+  const team = await axios.get(
+    `https://soccer.sportmonks.com/api/v2.0/teams/${teamID}`,
+    {
+      params: {
+        include: "venue",
+        api_token: process.env.api_token,
+      },
+    }
+  );
+
+  return team.data.data.venue.data.name;
+}
+
+exports.get_stadium = get_stadium;
+exports.get_all_teams = get_all_teams;
 exports.get_current_season = get_current_season;
 exports.getLeagueDetails = getLeagueDetails;
 

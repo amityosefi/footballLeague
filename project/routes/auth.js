@@ -1,36 +1,26 @@
 var express = require("express");
 var router = express.Router();
-const DButils = require("../routes/utils/DButils");
+const auth = require("../routes/utils/auth_utils");
 const bcrypt = require("bcryptjs");
 let CURRENT_USERNAME = "";
 
 
 router.post("/Register", async (req, res, next) => {
   try {
-    // parameters exists
-    // valid parameters
-    // username exists
-    const users = await DButils.execQuery(
-      "SELECT username FROM dbo.users"
-    );
 
-    if (users.find((x) => x.username === req.body.username))
+    let isExists = await auth.check_if_username_exists(req.body.username);
+    if (isExists == true) {
       throw { status: 409, message: "Username taken" };
+    }
 
     //hash the password
-    let hash_password = bcrypt.hashSync(
-      req.body.password,
-      parseInt(process.env.bcrypt_saltRounds)
-    );
+    let hash_password = await auth.hash_password(req.body.password);
     req.body.password = hash_password;
 
     // add the new username
-    await DButils.execQuery(
-      `INSERT INTO dbo.users (username, password, email, firstname, lastname, country, img) VALUES ('${req.body.username}', '${hash_password}','${req.body.email}', '${req.body.firstname}','${req.body.lastname}','${req.body.country}','${req.body.imageUrl}')`
-    );
+    await auth.add_username(req.body.username, hash_password, req.body.email, req.body.firstname, req.body.lastname, req.body.country, req.body.imageUrl);
 
-    req.session.lastSearch = null;
-
+    //set cookie
     res.status(201).send("user created");
   } catch (error) {
     next(error);
@@ -40,18 +30,17 @@ router.post("/Register", async (req, res, next) => {
 router.post("/Login", async (req, res, next) => {
   
   try {
-    if (CURRENT_USERNAME == req.body.username){
+
+    let isLogin = await auth.check_if_username_login(CURRENT_USERNAME, req.body.username);
+    if (isLogin == true) {
       throw { status: 401, message: "Username already login" };
     }
 
-    const user = (
-      await DButils.execQuery(
-        `SELECT * FROM dbo.users WHERE username = '${req.body.username}'`
-      )
-    )[0];
+    let user = await auth.get_user(req.body.username);
 
     // check that username exists & the password is correct
-    if (!user || !bcrypt.compareSync(req.body.password, user.password)) {
+    let isnCorrect = await auth.check_username_and_password(user, req.body.password, user.password)
+    if (isnCorrect == true){
       throw { status: 401, message: "Username or Password incorrect" };
     }
 

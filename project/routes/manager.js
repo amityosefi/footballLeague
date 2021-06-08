@@ -1,9 +1,9 @@
 var express = require("express");
 var router = express.Router();
 const DButils = require("../routes/utils/DButils");
-const users_utils = require("./utils/users_utils");
-const referee_utils = require("./utils/referees_utils");
-
+const league_utils = require("./utils/league_utils");
+const manager_utils = require("./utils/manager_utils");
+const referees_utils = require("./utils/referees_utils");
 
 const ManagUtils = require("../routes/utils/manager_utils");
 
@@ -48,7 +48,24 @@ router.post("/addGame", async (req, res, next) => {
                 res.status(201).send("game has been added");
             }
             else{
+<<<<<<< HEAD
                 res.status(201).send("game can not be added");
+=======
+                const games = await ManagUtils.getAllMatches();
+    
+
+                let flag = checkExistanceGame(games, req);
+
+                if(flag){
+                    await DButils.execQuery(
+                        `INSERT INTO dbo.games (gamedate, gametime, hometeamID, awayteamID, field, homegoal, awaygoal, referee, stage) VALUES ('${req.body.gamedate}','${req.body.gametime}', '${req.body.hometeamID}','${req.body.awayteamID}','${req.body.field}', NULL, NULL, '${req.body.referee}', 'Championship Round')`
+                    );
+                    res.status(201).send("game has been added");
+                }
+                else{
+                    res.status(201).send("game can not be added");
+                }
+>>>>>>> 6a261ae4bd85fda62fbfe05d7837ab7b566ffde9
             }
             
      
@@ -143,21 +160,26 @@ router.post("/addEvent", async (req, res, next) => {
     }
 });
 
-
-
-router.get("/viewAllUsers", async (req, res, next) => {
+router.post("/set_schedule", async (req, res, next) => {
     try {
         const user_id = req.session.user_id;
-        if (user_id != 2) {
-            res.status(403).send("The user doesnt have access to add game")
+        const rounds = req.body.rounds;
+        if (isNaN(rounds)){
+            throw { status: 400, message: "incorrect inputs" };
         }
-        else {
-            const users = await users_utils.getUsers();
-            res.status(200).send(users);
+        const teams_stadiums = await league_utils.get_all_teams();
+        // const referees = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+        const referees = await referees_utils.getAllReferees();
+        let teams = [];
+        let stadiums = new Object();
+        for(let i = 0; i < teams_stadiums.length; i ++){
+            teams.push(teams_stadiums[i][0]);
+            stadiums[teams_stadiums[i][0]] =  teams_stadiums[i][1];
         }
-      
+        const ans = await manager_utils.doSchedule(teams, referees, stadiums, rounds);
+        res.status(201).send(ans);
     } catch (error) {
-      next(error);
+        next(error);
     }
   });
 
@@ -166,7 +188,7 @@ router.post("/appointReferee", async (req, res, next) => {
     try {
         const user_id = req.session.user_id;
         if (user_id != 2) {
-            res.status(403).send("The user doesnt have access to add game")
+            res.status(403).send("The user doesnt have access")
         }
         else {
             const user_id = req.body.userID;

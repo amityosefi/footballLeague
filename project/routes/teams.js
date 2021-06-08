@@ -36,5 +36,19 @@ router.get("/teamDetails/:teamId", async (req, res, next) => {
   }
 });
 
+<<<<<<< HEAD
+router.get("/teamStadium/:teamId", async (req, res, next) => {
+  let teamID= req.params.teamId;
+  try {
+    const stadium = await teams_utils.get_stadium(teamID);
 
+    res.status(200).send(stadium)
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+=======
+>>>>>>> 608cabfed889dbe74915a3c102ea7fb6dcca7394
 module.exports = router;
