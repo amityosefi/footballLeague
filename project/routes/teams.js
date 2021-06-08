@@ -36,7 +36,6 @@ router.get("/teamDetails/:teamId", async (req, res, next) => {
   }
 });
 
-<<<<<<< HEAD
 router.get("/teamStadium/:teamId", async (req, res, next) => {
   let teamID= req.params.teamId;
   try {
@@ -49,6 +48,4 @@ router.get("/teamStadium/:teamId", async (req, res, next) => {
 });
 
 
-=======
->>>>>>> 608cabfed889dbe74915a3c102ea7fb6dcca7394
 module.exports = router;
