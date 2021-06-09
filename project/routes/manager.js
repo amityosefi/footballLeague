@@ -152,22 +152,24 @@ router.post("/set_schedule", async (req, res, next) => {
         if (isNaN(rounds)){
             throw { status: 400, message: "incorrect inputs" };
         }
-        if (!(rounds != 1) && !(rounds != 2)){
-            throw { status: 400, message: "incorrect inputs" };
+        if ((rounds != 1) && (rounds != 2) && !(rounds == 1 || rounds == 2)){
+            res.status(400).send("rounds can be 1 or 2 only");
         }
-        const teams_stadiums = await league_utils.get_all_teams();
-        const referees = await referees_utils.getAllReferees();
-        if (referees.length < 6){
-            throw { status: 400, message: "There are not enough referees in that league" };
-        }
-        let teams = [];
-        let stadiums = new Object();
-        for(let i = 0; i < teams_stadiums.length; i ++){
-            teams.push(teams_stadiums[i][0]);
-            stadiums[teams_stadiums[i][0]] =  teams_stadiums[i][1];
-        }
-        await manager_utils.doSchedule(teams, referees, stadiums, rounds);
-        res.status(201).send("games added successfully");
+        else{
+            const teams_stadiums = await league_utils.get_all_teams();
+            const referees = await referees_utils.getAllReferees();
+            if (referees.length < 6){
+                throw { status: 400, message: "There are not enough referees in that league" };
+            }
+            let teams = [];
+            let stadiums = new Object();
+            for(let i = 0; i < teams_stadiums.length; i ++){
+                teams.push(teams_stadiums[i][0]);
+                stadiums[teams_stadiums[i][0]] =  teams_stadiums[i][1];
+            }
+            await manager_utils.doSchedule(teams, referees, stadiums, rounds);
+            res.status(201).send("games added successfully");
+    }
     } catch (error) {
         next(error);
     }
