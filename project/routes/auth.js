@@ -8,7 +8,7 @@ let CURRENT_USERNAME = "";
 router.post("/Register", async (req, res, next) => {
   try {
 
-    let isExists = await auth.check_if_username_exists(req.body.username);
+    let isExists = auth.check_if_username_exists(req.body.username);
     if (isExists == true) {
       throw { status: 409, message: "Username taken" };
     }
@@ -39,7 +39,7 @@ router.post("/Login", async (req, res, next) => {
     let user = await auth.get_user(req.body.username);
 
     // check that username exists & the password is correct
-    let isnCorrect = await auth.check_username_and_password(user, req.body.password, user.password)
+    let isnCorrect = await auth.check_username_and_password(user, req.body.password)
     if (isnCorrect == true){
       throw { status: 401, message: "Username or Password incorrect" };
     }

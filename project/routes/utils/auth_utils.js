@@ -30,8 +30,9 @@ async function check_if_username_exists(username) {
   }
 
 
-  async function check_if_username_login(curr_user, new_user) {
-    
+  async function check_if_username_login(curr_user, new_user, password) {
+  
+
     if (curr_user == new_user) {
         return true;
     }
@@ -53,16 +54,14 @@ async function check_if_username_exists(username) {
 
   }
 
-  async function check_username_and_password(user, pass1, pass2) {
-    
-    if (!user || !bcrypt.compareSync(pass1, pass2)) {
+  async function check_username_and_password(user, pass) {
+
+    if (!user || !bcrypt.compareSync(pass, user.password)) {
         return true;
       }
 
       return false;
   }
-
-  
 
 
   exports.check_if_username_exists = check_if_username_exists;
