@@ -34,12 +34,10 @@ router.post("/addGame", async (req, res, next) => {
 
             ManagUtils.checkInput(req.body.gamedate, req.body.gametime, req.body.hometeamID, req.body.awayteamID, req.body.field, req.body.referee);
             
-            const fieldgame = await ManagUtils.getStadium(req.body.field);
-            const refereegame = await referees_utils.getReferee(req.body.referee);
+            // const fieldgame = await ManagUtils.getStadium(req.body.field);
+            const referee_id = await referees_utils.getReferee(req.body.referee);
 
-            ManagUtils.validParameters(req.body.gamedate, fieldgame, refereegame);
-
-            
+            ManagUtils.validParameters(req.body.gamedate, referee_id);
             const games = await ManagUtils.getAllMatches();
             let flag = ManagUtils.checkExistanceGame(games, req);
 

@@ -59,18 +59,7 @@ router.get("/allgames", async (req, res, next) => {
   }
 });
 
-router.get("/allgames", async (req, res, next) => {
-  try {
 
-    const all_games = await DButils.execQuery(
-      `select * from dbo.games`
-    );
-
-    res.status(200).send(all_games);
-  } catch (error) {
-    next(error);
-  }
-});
 
 router.get("/teamsbyleague", async (req, res, next) => {
   try {

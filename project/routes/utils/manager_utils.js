@@ -91,6 +91,7 @@ function secondRound(stages, referees, stadiums){
     }
     return stages2
 }
+
 function chooseReferees(referees){
     let arr = [];
     while(arr.length < 6){
@@ -166,7 +167,7 @@ function getAllMatches(){
 }
 
 
-function validParameters(gamedate, fieldgame, refereegame){
+function validParameters(gamedate,  refereegame){
     let dateReg = /^\d{4}[./-]\d{2}[./-]\d{2}$/;
     let isdatevalid = dateReg.test(gamedate);
     if(!isdatevalid){
