@@ -54,13 +54,13 @@ async function check_if_username_exists(username) {
 
   }
 
-  async function check_username_and_password(user, pass) {
+  async function check_username_and_password(user, pass1, pass2) {
 
-    if (!user || !bcrypt.compareSync(pass, user.password)) {
-        return true;
+    if (!user || !bcrypt.compareSync(pass1, pass2)) {
+        return false;
       }
 
-      return false;
+      return true;
   }
 
 

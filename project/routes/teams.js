@@ -41,11 +41,10 @@ router.get("/teamStadium/:teamId", async (req, res, next) => {
   try {
     const stadium = await teams_utils.get_stadium(teamID);
 
-//     res.status(200).send(stadium)
-//   } catch (error) {
-//     next(error);
-//   }
-// });
-
+      res.status(200).send(stadium)
+    } catch (error) {
+      next(error);
+    }
+  });
 
 module.exports = router;

@@ -8,7 +8,7 @@ let CURRENT_USERNAME = "";
 router.post("/Register", async (req, res, next) => {
   try {
 
-    let isExists = auth.check_if_username_exists(req.body.username);
+    let isExists = await auth.check_if_username_exists(req.body.username);
     if (isExists == true) {
       res.status(409).send("Username taken");
       // throw { status: 409, message: "Username taken" };
@@ -39,19 +39,10 @@ router.post("/Login", async (req, res, next) => {
     }
 
     let user = await auth.get_user(req.body.username);
-    // check that username exists & the password is correct
-<<<<<<< HEAD
-    let isnCorrect = await auth.check_username_and_password(user, req.body.password)
-    if (isnCorrect == true){
-      throw { status: 401, message: "Username or Password incorrect" };
-    }
-=======
->>>>>>> e44594858f4c6fd08249a3d1897bd7401cc251e7
-
-    // let isnCorrect = await auth.check_username_and_password(user, req.body.password, user.password)
-    if (user == undefined ||  await auth.check_username_and_password(user, req.body.password, user.password)){
+    if (user == undefined ||  !await auth.check_username_and_password(user, req.body.password, user.password)){
       // throw { status: 401, message: "Username or Password incorrect" };
       res.status(401).send("Username or Password incorrect");
+ 
     }
     else{
     // Set cookie
