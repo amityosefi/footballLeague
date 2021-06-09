@@ -3,20 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "client-sessions": "^0.8.0",
-    "cors": "^2.8.5",
-    "dotenv": "^10.0.0",
-    "express": "^4.17.1",
-    "fast-deep-equal": "^3.1.3",
-    "morgan": "^1.10.0",
-    "mssql": "^7.1.0"
-  },
-  "devDependencies": {
-    "jest": "^27.0.4",
-    "supertest": "^6.1.3"
-  },
   "scripts": {
     "test": "jest"
   },
@@ -24,10 +10,37 @@
     "type": "git",
     "url": "git+https://github.com/amityosefi/footballLeague.git"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/amityosefi/footballLeague/issues"
   },
-  "homepage": "https://github.com/amityosefi/footballLeague#readme"
+  "homepage": "https://github.com/amityosefi/footballLeague#readme",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "bcryptjs": "^2.4.3",
+    "client-sessions": "^0.8.0",
+    "cors": "^2.8.5",
+    "dotenv": "^9.0.2",
+    "express": "^4.17.1",
+    "g": "^2.0.1",
+    "morgan": "^1.10.0",
+    "mssql": "^7.1.0",
+    "nodemon": "^2.0.7",
+    "path": "^0.12.7",
+    "round-robin-tournament": "^1.2.3"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "jest": "^27.0.4",
+    "superagent": "^6.1.0",
+    "supertest": "^6.1.3"
+  },
+  "jest": {
+    "setupFiles": [
+      "./project/tests/tests_env.js"
+    ]
+  }
 }

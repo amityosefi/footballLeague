@@ -36,10 +36,10 @@ router.get("/teamDetails/:teamId", async (req, res, next) => {
   }
 });
 
-// router.get("/teamStadium/:teamId", async (req, res, next) => {
-//   let teamID= req.params.teamId;
-//   try {
-//     const stadium = await teams_utils.get_stadium(teamID);
+router.get("/teamStadium/:teamId", async (req, res, next) => {
+  let teamID= req.params.teamId;
+  try {
+    const stadium = await teams_utils.get_stadium(teamID);
 
 //     res.status(200).send(stadium)
 //   } catch (error) {
