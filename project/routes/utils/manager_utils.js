@@ -2,6 +2,8 @@ const axios = require("axios");
 const DButils = require("./DButils");
 let api_domain = 'https://soccer.sportmonks.com/api/v2.0';
 
+
+
 function shiftTeams(arr){
 
     // function that shift teams in order to create next stage
@@ -30,24 +32,37 @@ function shiftTeams(arr){
     secondRow[arr[0].length-1] = arr[0][arr[0].length-1];
     return [firstRow, secondRow];
 }
+function create2D(teams){
+        // initial 2D arrays
+        // input: [1,2,3,4,5,6]
+        // output: [[1,2,3],[4,5,6]]
+        let arr = new Array(2);
+        arr[0] = new Array(teams.length / 2);
+        arr[1] = new Array(teams.length / 2);
+    
+        // set team to each index
+        for (let i = 0; i < teams.length; i++) {
+            if (i < teams.length / 2){
+                arr[0][i] = teams[i];
+            } else{
+                arr[1][i - teams.length / 2] = teams[i];
+            }
+        }
+        return arr;
+}
 
+async function createGame(stages){
+    for (let i = 0; i < stages.length; i++){ 
+        for (let j = 0; j < stages[0].length; j++){
+            await sendGameIntoDB(stages[i][j][0], stages[i][j][1], stages[i][j][2], stages[i][j][3], stages[i][j][4], stages[i][j][5], stages[i][j][6]); 
+        }
+    }
+}
 
 async function doSchedule(teams, referees, stadiums, rounds) {
     // function that create league schedule
 
-    // initial 2D arrays
-    let arr = new Array(2);
-    arr[0] = new Array(teams.length / 2);
-    arr[1] = new Array(teams.length / 2);
-
-    // set team to each index
-    for (let i = 0; i < teams.length; i++) {
-        if (i < teams.length / 2){
-            arr[0][i] = teams[i];
-        } else{
-            arr[1][i - teams.length / 2] = teams[i];
-        }
-    }
+    let arr = create2D(teams);
 
     // make stage half of the teams length, and cluster two teams to one game
     let stages = []; // each index = one stage
@@ -56,25 +71,16 @@ async function doSchedule(teams, referees, stadiums, rounds) {
         let stage = new Array(teams.length/2);
         let chosen_referees = chooseReferees(referees);
         for(let j = 0; j < teams.length / 2; j++){
-            let x = arr[0][j];
             stage[j] = [setDate(j, i) ,setTime(j), arr[0][j] , arr[1][j], stadiums[arr[0][j]], referees[chosen_referees[j]].name, i + 1];
         }
         stages[i] = stage;
         arr = shiftTeams(arr);
     }
-    if (rounds == 1){
-        return stages;
-    }
-    else{
+    if (rounds == 2){
         stages2 = secondRound(stages, referees, stadiums);
         stages = stages.concat(stages2);
-        
     }
-    for (let i = 0; i < stages.length; i++){ 
-        for (let j = 0; j < stages[0].length; j++)
-        await sendGameIntoDB(stages[i][j][0], stages[i][j][1], stages[i][j][2], stages[i][j][3], stages[i][j][4], stages[i][j][5], stages[i][j][6]); 
-    }
-    
+    createGame(stages);
 }
 
 function secondRound(stages, referees, stadiums){
@@ -213,7 +219,7 @@ function checkExistanceGame(games, req){
     return true;
 }
 
-exports.doSchedule = doSchedule;
+
 
 async function sendGameIntoDB(Gamedate, Gametime, HometeamID, AwayteamID, Field, Referee, stage){
     await DButils.execQuery(
@@ -224,7 +230,8 @@ async function sendGameIntoDB(Gamedate, Gametime, HometeamID, AwayteamID, Field,
 
 
 
-
+exports.doSchedule = doSchedule;
+exports.setTime = setTime;
 exports.getStadium = getStadium;
 exports.getAllMatches = getAllMatches;
 exports.validParameters = validParameters;

@@ -10,18 +10,18 @@ const ManagUtils = require("../routes/utils/manager_utils");
 
 router.use(async function (req, res, next) {
     if (req.session && req.session.user_id) {
-        DButils.execQuery("SELECT user_id FROM users")
-            .then((users) => {
-                if (users.find((x) => x.user_id === req.session.user_id)) {
-                    req.user_id = req.session.user_id;
-                    next();
-                }
-            })
-            .catch((err) => next(err));
+      await users_utils.getUserByID(req.session.user_id)
+        .then((users) => {
+          if (users.find((x) => x.user_id === req.session.user_id)) {
+            req.user_id = req.session.user_id;
+            next();
+          }
+        })
+        .catch((err) => next(err));
     } else {
-        res.sendStatus(401);
+      res.sendStatus(401);
     }
-});
+  });
 
 
 router.post("/addGame", async (req, res, next) => {
@@ -58,89 +58,89 @@ router.post("/addGame", async (req, res, next) => {
 });
 
 
-router.put("/addScore", async (req, res, next) => {
-    try {
-        const user_id = req.session.user_id;
-        if (user_id != 2) {
-            res.status(403).send("The user doesnt have access to add game")
-        }
-        else {
-            const gameid = req.body.gameId;
-            const homegoal = req.body.homegoal;
-            const awaygoal = req.body.awaygoal;
+// router.put("/addScore", async (req, res, next) => {
+//     try {
+//         const user_id = req.session.user_id;
+//         if (user_id != 2) {
+//             res.status(403).send("The user doesnt have access to add game")
+//         }
+//         else {
+//             const gameid = req.body.gameId;
+//             const homegoal = req.body.homegoal;
+//             const awaygoal = req.body.awaygoal;
 
-            if (isNaN(gameid) || isNaN(homegoal) || isNaN(awaygoal)){
-                throw { status: 400, message: "incorrect inputs" };
-            }
+//             if (isNaN(gameid) || isNaN(homegoal) || isNaN(awaygoal)){
+//                 throw { status: 400, message: "incorrect inputs" };
+//             }
 
-            if (homegoal < 0 || awaygoal < 0) {
-                throw { status: 400, message: "score can't be low than zero" };
-            }
+//             if (homegoal < 0 || awaygoal < 0) {
+//                 throw { status: 400, message: "score can't be low than zero" };
+//             }
 
-            const match = await DButils.execQuery(
-                `SELECT homegoal FROM dbo.games WHERE gameID = ${gameid}`
-            );
+//             const match = await DButils.execQuery(
+//                 `SELECT homegoal FROM dbo.games WHERE gameID = ${gameid}`
+//             );
 
-            if (typeof match[0] === 'undefined'){
-                res.status(201).send("there is no gameID");
-            }
+//             if (typeof match[0] === 'undefined'){
+//                 res.status(201).send("there is no gameID");
+//             }
            
-            else if (match[0].homegoal != null){
-                res.status(201).send("there is already score to this game");
-            }
-            else{
-                await DButils.execQuery(
-                    `update dbo.games set homegoal = '${homegoal}' , awaygoal = '${awaygoal}' where gameID = '${gameid}'`
-                );
-                await DButils.execQuery(
-                    `DELETE FROM dbo.favoriteGames WHERE gameID = '${gameid}'`
-                );
-                res.status(201).send("score has been added to game");
-            }
-        }
-    } catch (error) {
-        next(error);
-    }
-});
+//             else if (match[0].homegoal != null){
+//                 res.status(201).send("there is already score to this game");
+//             }
+//             else{
+//                 await DButils.execQuery(
+//                     `update dbo.games set homegoal = '${homegoal}' , awaygoal = '${awaygoal}' where gameID = '${gameid}'`
+//                 );
+//                 await DButils.execQuery(
+//                     `DELETE FROM dbo.favoriteGames WHERE gameID = '${gameid}'`
+//                 );
+//                 res.status(201).send("score has been added to game");
+//             }
+//         }
+//     } catch (error) {
+//         next(error);
+//     }
+// });
 
 
-router.post("/addEvent", async (req, res, next) => {
-    try {
+// router.post("/addEvent", async (req, res, next) => {
+//     try {
         
-        const user_id = req.session.user_id;
-        if (user_id != 2) {
-            res.status(403).send("The user doesnt have access to add game")
-        }
-        else {
-            if (isNaN(req.body.gameID) || isNaN(req.body.eventminute) || isNaN(req.body.playerID) || typeof req.body.dataevent != 'string'){
-                throw { status: 400, message: "incorrect inputs" };
-            }
+//         const user_id = req.session.user_id;
+//         if (user_id != 2) {
+//             res.status(403).send("The user doesnt have access to add game")
+//         }
+//         else {
+//             if (isNaN(req.body.gameID) || isNaN(req.body.eventminute) || isNaN(req.body.playerID) || typeof req.body.dataevent != 'string'){
+//                 throw { status: 400, message: "incorrect inputs" };
+//             }
 
-            if (req.body.eventminute < 0 || req.body.eventminute > 130) {
-                throw { status: 400, message: "incorrect inputs" };
-            }
-            const game = await DButils.execQuery(
-                `SELECT homegoal FROM dbo.games WHERE gameID = '${req.body.gameID}'`
-            );
+//             if (req.body.eventminute < 0 || req.body.eventminute > 130) {
+//                 throw { status: 400, message: "incorrect inputs" };
+//             }
+//             const game = await DButils.execQuery(
+//                 `SELECT homegoal FROM dbo.games WHERE gameID = '${req.body.gameID}'`
+//             );
 
-            if (typeof game[0] === 'undefined'){
-                res.status(201).send("there is no gameID");
-            }
+//             if (typeof game[0] === 'undefined'){
+//                 res.status(201).send("there is no gameID");
+//             }
            
-            else if (game[0].homegoal == null){
-                res.status(201).send("there is no option to add event");
-            }
-            else{
-                await DButils.execQuery(
-                    `INSERT INTO dbo.events (gameID, eventminute, dataevent, playerID) VALUES ('${req.body.gameID}', '${req.body.eventminute}','${req.body.dataevent}','${req.body.playerID}')`
-                );
-                res.status(201).send("event has been added");
-            }
-        }
-    } catch (error) {
-        next(error);
-    }
-});
+//             else if (game[0].homegoal == null){
+//                 res.status(201).send("there is no option to add event");
+//             }
+//             else{
+//                 await DButils.execQuery(
+//                     `INSERT INTO dbo.events (gameID, eventminute, dataevent, playerID) VALUES ('${req.body.gameID}', '${req.body.eventminute}','${req.body.dataevent}','${req.body.playerID}')`
+//                 );
+//                 res.status(201).send("event has been added");
+//             }
+//         }
+//     } catch (error) {
+//         next(error);
+//     }
+// });
 
 router.post("/set_schedule", async (req, res, next) => {
     try {
@@ -152,9 +152,14 @@ router.post("/set_schedule", async (req, res, next) => {
         if (isNaN(rounds)){
             throw { status: 400, message: "incorrect inputs" };
         }
+        if (!(rounds != 1) && !(rounds != 2)){
+            throw { status: 400, message: "incorrect inputs" };
+        }
         const teams_stadiums = await league_utils.get_all_teams();
-        // const referees = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
         const referees = await referees_utils.getAllReferees();
+        if (referees.length < 6){
+            throw { status: 400, message: "There are not enough referees in that league" };
+        }
         let teams = [];
         let stadiums = new Object();
         for(let i = 0; i < teams_stadiums.length; i ++){
