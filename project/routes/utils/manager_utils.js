@@ -220,12 +220,6 @@ function checkExistanceGame(games, req){
 }
 
 
-// async function getAllGames(){
-//     return await DButils.execQuery(
-//         `SELECT gameID FROM dbo.games`
-//     );
-// }
-
 async function sendGameIntoDB(Gamedate, Gametime, HometeamID, AwayteamID, Field, Referee, stage){
     await DButils.execQuery(
         `INSERT INTO dbo.games (gamedate, gametime, hometeamID, awayteamID, field, homegoal, awaygoal, referee, stage) VALUES ('${Gamedate}','${Gametime}', ${HometeamID}, ${AwayteamID},'${Field}', NULL, NULL, '${Referee}', ${stage})`
