@@ -80,7 +80,7 @@ async function doSchedule(teams, referees, stadiums, rounds) {
         stages2 = secondRound(stages, referees, stadiums);
         stages = stages.concat(stages2);
     }
-    createGame(stages);
+    await createGame(stages);
 }
 
 function secondRound(stages, referees, stadiums){
@@ -220,6 +220,11 @@ function checkExistanceGame(games, req){
 }
 
 
+// async function getAllGames(){
+//     return await DButils.execQuery(
+//         `SELECT gameID FROM dbo.games`
+//     );
+// }
 
 async function sendGameIntoDB(Gamedate, Gametime, HometeamID, AwayteamID, Field, Referee, stage){
     await DButils.execQuery(
@@ -228,6 +233,10 @@ async function sendGameIntoDB(Gamedate, Gametime, HometeamID, AwayteamID, Field,
 }
 
 
+
+async function getAllGames(){
+    return await DButils.execQuery(`select gameID from games`);
+}
 
 
 exports.create2D = create2D; 
@@ -242,4 +251,5 @@ exports.getAllMatches = getAllMatches;
 exports.sendGameIntoDB = sendGameIntoDB; 
 exports.createGame = createGame; 
 exports.doSchedule = doSchedule;
-exports.checkExistanceGame = checkExistanceGame;
+exports.checkExistanceGame = checkExistanceGame; 
+exports.getAllGames = getAllGames;
