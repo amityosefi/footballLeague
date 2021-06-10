@@ -80,7 +80,7 @@ async function doSchedule(teams, referees, stadiums, rounds) {
         stages2 = secondRound(stages, referees, stadiums);
         stages = stages.concat(stages2);
     }
-    createGame(stages);
+    await createGame(stages);
 }
 
 function secondRound(stages, referees, stadiums){
@@ -220,6 +220,11 @@ function checkExistanceGame(games, req){
 }
 
 
+// async function getAllGames(){
+//     return await DButils.execQuery(
+//         `SELECT gameID FROM dbo.games`
+//     );
+// }
 
 async function sendGameIntoDB(Gamedate, Gametime, HometeamID, AwayteamID, Field, Referee, stage){
     await DButils.execQuery(
@@ -229,12 +234,35 @@ async function sendGameIntoDB(Gamedate, Gametime, HometeamID, AwayteamID, Field,
 
 
 
+async function getAllGames(){
+    return await DButils.execQuery(`select gameID from games`);
+}
 
+
+// exports.doSchedule = doSchedule;
+// exports.setTime = setTime;
+// exports.getStadium = getStadium;
+// exports.getAllMatches = getAllMatches;
+// exports.validParameters = validParameters;
+// exports.checkInput = checkInput;
+// exports.checkExistanceGame = checkExistanceGame;
+// exports.sendGameIntoDB = sendGameIntoDB;
+// exports.getAllGames = getAllGames;
+// exports.chooseReferees = chooseReferees;
+// exports.secondRound = secondRound;
+// exports.createGame = createGame;
+
+exports.create2D = create2D; 
+exports.shiftTeams = shiftTeams; 
+exports.setTime = setTime; 
+exports.validParameters = validParameters; 
+exports.checkInput = checkInput; 
+exports.secondRound = secondRound; 
+exports.setDate = setDate; 
+exports.chooseReferees = chooseReferees; 
+exports.getAllMatches = getAllMatches; 
+exports.sendGameIntoDB = sendGameIntoDB; 
+exports.createGame = createGame; 
 exports.doSchedule = doSchedule;
-exports.setTime = setTime;
-exports.getStadium = getStadium;
-exports.getAllMatches = getAllMatches;
-exports.validParameters = validParameters;
-exports.checkInput = checkInput;
-exports.checkExistanceGame = checkExistanceGame;
-exports.sendGameIntoDB = sendGameIntoDB;
+exports.checkExistanceGame = checkExistanceGame; 
+exports.getAllGames = getAllGames;

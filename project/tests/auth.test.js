@@ -132,14 +132,3 @@ describe("integration tests + acceptance tests",() =>{
     });
 
 });
-
-
-// describe("integration tests + acceptance tests",() =>{
-
-//     const res = await request(app).post("/Logout").send({
-//         //session.reset
-//     });
-
-//     expect(res.success).toEqual(true);
-
-// });
