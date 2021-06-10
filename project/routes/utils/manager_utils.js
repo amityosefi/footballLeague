@@ -230,11 +230,16 @@ async function sendGameIntoDB(Gamedate, Gametime, HometeamID, AwayteamID, Field,
 
 
 
+exports.create2D = create2D; 
+exports.shiftTeams = shiftTeams; 
+exports.setTime = setTime; 
+exports.validParameters = validParameters; 
+exports.checkInput = checkInput; 
+exports.secondRound = secondRound; 
+exports.setDate = setDate; 
+exports.chooseReferees = chooseReferees; 
+exports.getAllMatches = getAllMatches; 
+exports.sendGameIntoDB = sendGameIntoDB; 
+exports.createGame = createGame; 
 exports.doSchedule = doSchedule;
-exports.setTime = setTime;
-exports.getStadium = getStadium;
-exports.getAllMatches = getAllMatches;
-exports.validParameters = validParameters;
-exports.checkInput = checkInput;
 exports.checkExistanceGame = checkExistanceGame;
-exports.sendGameIntoDB = sendGameIntoDB;
